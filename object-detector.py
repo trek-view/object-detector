@@ -7,6 +7,12 @@ import time
 import sys
 from imageai.Detection import ObjectDetection
 import json
+from PIL import Image
+import piexif
+import chilkat
+
+
+
 def getDetectedObject(detector, inputfile, outputfile, twicefile):
     
     detections = detector.detectObjectsFromImage(input_image=inputfile, output_image_path=outputfile)
@@ -16,8 +22,25 @@ def getDetectedObject(detector, inputfile, outputfile, twicefile):
         objectone = {}
         objectone[eachObject["name"]] = eachObject['box_points']
         objects.append(objectone)
-    return objects
+        
+    img = Image.open(inputfile)
 
+    exif_dict = piexif.load(img.info['exif'])
+    exif_bytes = piexif.dump(exif_dict)
+
+    piexif.insert(exif_bytes, outputfile) 
+            
+    xmp = chilkat.CkXmp()
+
+    xmp.LoadAppFile(inputfile)
+    xml = xmp.GetEmbedded(0)
+    xmp.LoadAppFile(outputfile)
+    xmp.Append(xml)
+    xmp.SaveAppFile(outputfile)
+    
+    return objects
+ 
+ 
 def main(argv):
     execution_path = os.getcwd()
 
