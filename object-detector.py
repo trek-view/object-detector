@@ -7,6 +7,9 @@ import time
 import sys
 from imageai.Detection import ObjectDetection
 import json
+from exiftool_custom import exiftool
+
+
 def getDetectedObject(detector, inputfile, outputfile, twicefile):
     
     detections = detector.detectObjectsFromImage(input_image=inputfile, output_image_path=outputfile)
@@ -16,8 +19,12 @@ def getDetectedObject(detector, inputfile, outputfile, twicefile):
         objectone = {}
         objectone[eachObject["name"]] = eachObject['box_points']
         objects.append(objectone)
+        
+    with exiftool.ExifTool() as et:
+        et.copy_tags(inputfile, outputfile)    
     return objects
-
+ 
+ 
 def main(argv):
     execution_path = os.getcwd()
 
